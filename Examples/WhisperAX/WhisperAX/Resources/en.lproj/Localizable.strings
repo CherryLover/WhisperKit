@@ -65,6 +65,14 @@
 "decoding_options" = "Decoding Options";
 "done" = "Done";
 
+"actions_after_completion" = "After Completion";
+"upload_text" = "Upload Text";
+"upload_audio" = "Upload Audio";
+"text_upload_url" = "Text Upload URL";
+"audio_upload_url" = "Audio Upload URL";
+"hint_upload_text" = "Will use POST method to upload text, format is json, field is text.";
+"hint_upload_audio" = "Will use POST method to upload text, format is form, field is audio_file.";
+
 // Toolbar
 "copy_text" = "Copy Text";
 

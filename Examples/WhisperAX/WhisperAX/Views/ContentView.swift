@@ -100,6 +100,11 @@ struct ContentView: View {
     @State private var selectedCategoryId: MenuItem.ID?
     @State private var transcribeTask: Task<Void, Never>? = nil
 
+    @State private var enableTextUpload: Bool = false
+    @State private var enableAudioUpload: Bool = false
+    @State private var textUploadURL: String = ""
+    @State private var audioUploadURL: String = ""
+
     struct MenuItem: Identifiable, Hashable {
         var id = UUID()
         var name: String
@@ -902,6 +907,36 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                     }
                 }
                 .padding(.horizontal)
+            }
+            
+            Section(header: Text(localizedString("actions_after_completion"))) {
+                HStack {
+                    Text(localizedString("upload_text"))
+                    InfoButton(localizedString("hint_upload_text"))
+                    Spacer()
+                    Toggle("", isOn: $enableTextUpload)
+                }
+                .padding(.horizontal)
+                
+                if enableTextUpload {
+                    TextField(localizedString("text_upload_url"), text: $textUploadURL)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                }
+                
+                HStack {
+                    Text(localizedString("upload_audio"))
+                    InfoButton(localizedString("hint_upload_audio"))
+                    Spacer()
+                    Toggle("", isOn: $enableAudioUpload)
+                }
+                .padding(.horizontal)
+                
+                if enableAudioUpload {
+                    TextField(localizedString("audio_upload_url"), text: $audioUploadURL)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                }
             }
         }
         .navigationTitle(localizedString("decoding_options"))

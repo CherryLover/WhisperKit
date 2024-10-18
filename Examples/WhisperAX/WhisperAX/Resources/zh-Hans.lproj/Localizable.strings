@@ -60,6 +60,14 @@
 "decoding_options" = "解码选项";
 "done" = "完成";
 
+"actions_after_completion" = "完成后";
+"upload_text" = "上传文本";
+"upload_audio" = "上传音频";
+"text_upload_url" = "文本上传接口地址";
+"audio_upload_url" = "音频上传接口地址";
+"hint_upload_text" = "会使用 POST 方式将文本进行上传，格式为 json，字段是text。";
+"hint_upload_audio" = "会使用 POST 方式将文本进行上传，格式为 form 表单，字段是 audio_file。";
+
 // 工具栏
 "copy_text" = "复制文本";
 
