@@ -777,7 +777,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
         List {
             HStack {
                 Text(localizedString("show_timestamps"))
-                InfoButton(localizedString("Toggling this will include/exclude timestamps in both the UI and the prefill tokens.\nEither <|notimestamps|> or <|0.00|> will be forced based on this setting unless \"Prompt Prefill\" is de-selected."))
+                InfoButton(localizedString("hint_show_timestamps"))
                 Spacer()
                 Toggle("", isOn: $enableTimestamps)
             }
@@ -785,7 +785,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
 
             HStack {
                 Text(localizedString("special_characters"))
-                InfoButton(localizedString("Toggling this will include/exclude special characters in the transcription text."))
+                InfoButton(localizedString("hint_special_characters"))
                 Spacer()
                 Toggle("", isOn: $enableSpecialCharacters)
             }
@@ -793,7 +793,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
 
             HStack {
                 Text(localizedString("show_decoder_preview"))
-                InfoButton(localizedString("Toggling this will show a small preview of the decoder output in the UI under the transcribe. This can be useful for debugging."))
+                InfoButton(localizedString("hint_show_decoder_preview"))
                 Spacer()
                 Toggle("", isOn: $enableDecoderPreview)
             }
@@ -801,7 +801,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
 
             HStack {
                 Text(localizedString("prompt_prefill"))
-                InfoButton(localizedString("When Prompt Prefill is on, it will force the task, language, and timestamp tokens in the decoding loop. \nToggle it off if you'd like the model to generate those tokens itself instead."))
+                InfoButton(localizedString("hint_prompt_prefill"))
                 Spacer()
                 Toggle("", isOn: $enablePromptPrefill)
             }
@@ -809,7 +809,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
 
             HStack {
                 Text(localizedString("cache_prefill"))
-                InfoButton(localizedString("When Cache Prefill is on, the decoder will try to use a lookup table of pre-computed KV caches instead of computing them during the decoding loop. \nThis allows the model to skip the compute required to force the initial prefill tokens, and can speed up inference"))
+                InfoButton(localizedString("hint_cache_prefill"))
                 Spacer()
                 Toggle("", isOn: $enableCachePrefill)
             }
@@ -817,7 +817,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
 
             HStack {
                 Text(localizedString("chunking_strategy"))
-                InfoButton(localizedString("Select the strategy to use for chunking audio data. If VAD is selected, the audio will be chunked based on voice activity (split on silent portions)."))
+                InfoButton(localizedString("hint_chunking_strategy"))
                 Spacer()
                 Picker("", selection: $chunkingStrategy) {
                     Text(localizedString("none")).tag(ChunkingStrategy.none)
@@ -833,7 +833,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                 HStack {
                     Slider(value: $temperatureStart, in: 0...1, step: 0.1)
                     Text(temperatureStart.formatted(.number))
-                    InfoButton(localizedString("Controls the initial randomness of the decoding loop token selection.\nA higher temperature will result in more random choices for tokens, and can improve accuracy."))
+                    InfoButton(localizedString("hint_starting_temperature"))
                 }
             }
             .padding(.horizontal)
@@ -844,7 +844,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                     Slider(value: $fallbackCount, in: 0...5, step: 1)
                     Text(fallbackCount.formatted(.number))
                         .frame(width: 30)
-                    InfoButton(localizedString("Controls how many times the decoder will fallback to a higher temperature if any of the decoding thresholds are exceeded.\n Higher values will cause the decoder to run multiple times on the same audio, which can improve accuracy at the cost of speed."))
+                    InfoButton(localizedString("hint_max_fallback_count"))
                 }
             }
             .padding(.horizontal)
@@ -855,7 +855,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                     Slider(value: $compressionCheckWindow, in: 0...100, step: 5)
                     Text(compressionCheckWindow.formatted(.number))
                         .frame(width: 30)
-                    InfoButton(localizedString("Amount of tokens to use when checking for whether the model is stuck in a repetition loop.\nRepetition is checked by using zlib compressed size of the text compared to non-compressed value.\n Lower values will catch repetitions sooner, but too low will miss repetition loops of phrases longer than the window."))
+                    InfoButton(localizedString("hint_compression_check_tokens"))
                 }
             }
             .padding(.horizontal)
@@ -866,7 +866,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                     Slider(value: $sampleLength, in: 0...Double(min(whisperKit?.textDecoder.kvCacheMaxSequenceLength ?? Constants.maxTokenContext, Constants.maxTokenContext)), step: 10)
                     Text(sampleLength.formatted(.number))
                         .frame(width: 30)
-                    InfoButton(localizedString("Maximum number of tokens to generate per loop.\nCan be lowered based on the type of speech in order to further prevent repetition loops from going too long."))
+                    InfoButton(localizedString("hint_max_tokens_per_loop"))
                 }
             }
             .padding(.horizontal)
@@ -877,7 +877,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                     Slider(value: $silenceThreshold, in: 0...1, step: 0.05)
                     Text(silenceThreshold.formatted(.number))
                         .frame(width: 30)
-                    InfoButton(localizedString("Relative silence threshold for the audio. \n Baseline is set by the quietest 100ms in the previous 2 seconds."))
+                    InfoButton(localizedString("hint_silence_threshold"))
                 }
             }
             .padding(.horizontal)
@@ -885,7 +885,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
             Section(header: Text(localizedString("experimental"))) {
                 HStack {
                     Text(localizedString("eager_streaming_mode"))
-                    InfoButton(localizedString("When Eager Streaming Mode is on, the transcription will be updated more frequently, but with potentially less accurate results."))
+                    InfoButton(localizedString("hint_eager_streaming_mode"))
                     Spacer()
                     Toggle("", isOn: $enableEagerDecoding)
                 }
@@ -898,7 +898,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                         Slider(value: $tokenConfirmationsNeeded, in: 1...10, step: 1)
                         Text(tokenConfirmationsNeeded.formatted(.number))
                             .frame(width: 30)
-                        InfoButton(localizedString("Controls the number of consecutive tokens required to agree between decoder loops before considering them as confirmed in the streaming process."))
+                        InfoButton(localizedString("hint_token_confirmations"))
                     }
                 }
                 .padding(.horizontal)

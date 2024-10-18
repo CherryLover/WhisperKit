@@ -34,21 +34,34 @@
 // Settings
 "source_language" = "Source Language";
 "show_timestamps" = "Show Timestamps";
+"hint_show_timestamps" = "Toggling this will include/exclude timestamps in both the UI and the prefill tokens.\nEither <|notimestamps|> or <|0.00|> will be forced based on this setting unless \"Prompt Prefill\" is de-selected.";
 "special_characters" = "Special Characters";
+"hint_special_characters" = "Toggling this will include/exclude special characters in the transcription text.";
 "show_decoder_preview" = "Show Decoder Preview";
+"hint_show_decoder_preview" = "Toggling this will show a small preview of the decoder output in the UI under the transcribe. This can be useful for debugging.";
 "prompt_prefill" = "Prompt Prefill";
+"hint_prompt_prefill" = "When Prompt Prefill is on, it will force the task, language, and timestamp tokens in the decoding loop. \nToggle it off if you'd like the model to generate those tokens itself instead.";
 "cache_prefill" = "Cache Prefill";
+"hint_cache_prefill" = "When Cache Prefill is on, the decoder will try to use a lookup table of pre-computed KV caches instead of computing them during the decoding loop. \nThis allows the model to skip the compute required to force the initial prefill tokens, and can speed up inference";
 "chunking_strategy" = "Chunking Strategy";
+"hint_chunking_strategy" = "Select the strategy to use for chunking audio data. If VAD is selected, the audio will be chunked based on voice activity (split on silent portions).";
 "none" = "None";
 "vad" = "VAD";
 "starting_temperature" = "Starting Temperature:";
+"hint_starting_temperature" = "Controls the initial randomness of the decoding loop token selection.\nA higher temperature will result in more random choices for tokens, and can improve accuracy.";
 "max_fallback_count" = "Max Fallback Count:";
+"hint_max_fallback_count" = "Controls how many times the decoder will fallback to a higher temperature if any of the decoding thresholds are exceeded.\n Higher values will cause the decoder to run multiple times on the same audio, which can improve accuracy at the cost of speed.";
 "compression_check_tokens" = "Compression Check Tokens";
+"hint_compression_check_tokens" = "Amount of tokens to use when checking for whether the model is stuck in a repetition loop.\nRepetition is checked by using zlib compressed size of the text compared to non-compressed value.\n Lower values will catch repetitions sooner, but too low will miss repetition loops of phrases longer than the window.";
 "max_tokens_per_loop" = "Max Tokens Per Loop";
+"hint_max_tokens_per_loop" = "Maximum number of tokens to generate per loop.\nCan be lowered based on the type of speech in order to further prevent repetition loops from going too long.";
 "silence_threshold" = "Silence Threshold";
+"hint_silence_threshold" = "Relative silence threshold for the audio. \n Baseline is set by the quietest 100ms in the previous 2 seconds.";
 "experimental" = "Experimental";
 "eager_streaming_mode" = "Eager Streaming Mode";
+"hint_eager_streaming_mode" = "When Eager Streaming Mode is on, the transcription will be updated more frequently, but with potentially less accurate results.";
 "token_confirmations" = "Token Confirmations";
+"hint_token_confirmations" = "Controls the number of consecutive tokens required to agree between decoder loops before considering them as confirmed in the streaming process.";
 "decoding_options" = "Decoding Options";
 "done" = "Done";
 
