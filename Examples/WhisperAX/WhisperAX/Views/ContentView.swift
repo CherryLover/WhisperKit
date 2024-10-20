@@ -1211,6 +1211,18 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
             isTranscribing = true
             do {
                 try await transcribeCurrentFile(path: path)
+                
+                // 在转录完成后上传文本和音频
+                await MainActor.run {
+                    if enableTextUpload {
+                        uploadTranscribedText(type: "transcribeFile")
+                    }
+                    if enableAudioUpload {
+                        if let audioData = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+                            uploadAudioFile(audioData, type: "transcribeFile")
+                        }
+                    }
+                }
             } catch {
                 print("File selection error: \(error.localizedDescription)")
             }
@@ -1276,21 +1288,37 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
             audioProcessor.stopRecording()
         }
 
-        // If not looping, transcribe the full buffer
+        finalizeText()
+
+        // 如果不是循环模式，转录完整缓冲区
         if !loop {
             self.transcribeTask = Task {
                 isTranscribing = true
                 do {
                     try await transcribeCurrentBuffer()
                 } catch {
-                    print("Error: \(error.localizedDescription)")
+                    print("错误 real: \(error.localizedDescription)")
                 }
-                finalizeText()
                 isTranscribing = false
             }
+            
+            // 创建一个新的任务来处理上传
+            Task {
+                await transcribeTask?.value // 等待转录任务完成
+                
+                await MainActor.run {
+                    print("检查是否需要上传文本")
+                    if enableTextUpload {
+                        uploadTranscribedText(type: "stopRecording")
+                    }
+                    if enableAudioUpload {
+                        if let audioData = try? Data(contentsOf: URL(fileURLWithPath: "path_to_audio_file")) {
+                            uploadAudioFile(audioData, type: "stopRecording")
+                        }
+                    }
+                }
+            }
         }
-
-        finalizeText()
     }
 
     func finalizeText() {
@@ -1308,6 +1336,93 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                 }
             }
         }
+    }
+
+    // 添加新的上传文本函数
+    func uploadTranscribedText(type: String) {
+        print("上传类型: \(type)")
+        print("开始上传转录文本")
+        guard let url = URL(string: textUploadURL) else {
+            print("无效的上传URL: \(textUploadURL)")
+            return
+        }
+        
+        let fullText: String
+        if enableEagerDecoding {
+            fullText = confirmedText + hypothesisText
+        } else {
+            fullText = formatSegments(confirmedSegments + unconfirmedSegments, withTimestamps: enableTimestamps).joined(separator: "\n")
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let uploadData = ["text": fullText]
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(uploadData)
+        } catch {
+            print("编码上传数据时出错: \(error)")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("上传文本时出错: \(error)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("上传文本响应状态码: \(httpResponse.statusCode)")
+            }
+            
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("上传文本响应: \(responseString)")
+            }
+        }.resume()
+    }
+
+    // 添加新的上传音频函数
+    func uploadAudioFile(_ audioData: Data, type: String) {
+        print("上传音频类型: \(type)")
+        print("开始上传音频文件")
+        guard let url = URL(string: audioUploadURL) else {
+            print("无效的上传URL: \(audioUploadURL)")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        // 设置 Content-Type 为 multipart/form-data
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        // 创建 multipart/form-data body
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"audio_file\"; filename=\"audio.wav\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: audio/wav\r\n\r\n".data(using: .utf8)!)
+        body.append(audioData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = body
+        
+        URLSession.shared.uploadTask(with: request, from: body) { data, response, error in
+            if let error = error {
+                print("上传音频时出错: \(error)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("上传音频响应状态码: \(httpResponse.statusCode)")
+            }
+            
+            if let data = data, let responseString = String(data: data, encoding: .utf8) {
+                print("上传音频响应: \(responseString)")
+            }
+        }.resume()
     }
 
     // MARK: - Transcribe Logic
@@ -1448,9 +1563,25 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
         }
     }
 
+    // 在停止实时转录后执行上传
     func stopRealtimeTranscription() {
         isTranscribing = false
         transcriptionTask?.cancel()
+
+        // 在停止实时转录后执行上传
+        Task {
+            await MainActor.run {
+                print("检查是否需要上传文本")
+                if enableTextUpload {
+                    uploadTranscribedText(type: "stopRealtimeTranscription")
+                }
+                if enableAudioUpload {
+                    if let audioData = try? Data(contentsOf: URL(fileURLWithPath: "path_to_audio_file")) {
+                        uploadAudioFile(audioData, type: "stopRealtimeTranscription")
+                    }
+                }
+            }
+        }
     }
 
     func transcribeCurrentBuffer() async throws {
