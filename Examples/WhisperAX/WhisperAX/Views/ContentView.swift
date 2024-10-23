@@ -100,10 +100,10 @@ struct ContentView: View {
     @State private var selectedCategoryId: MenuItem.ID?
     @State private var transcribeTask: Task<Void, Never>? = nil
 
-    @State private var enableTextUpload: Bool = false
-    @State private var enableAudioUpload: Bool = false
-    @State private var textUploadURL: String = ""
-    @State private var audioUploadURL: String = ""
+    @AppStorage("enableTextUpload") private var enableTextUpload: Bool = false
+    @AppStorage("enableAudioUpload") private var enableAudioUpload: Bool = false
+    @AppStorage("textUploadURL") private var textUploadURL: String = ""
+    @AppStorage("audioUploadURL") private var audioUploadURL: String = ""
 
     struct MenuItem: Identifiable, Hashable {
         var id = UUID()
@@ -924,19 +924,19 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
                         .padding(.horizontal)
                 }
                 
-                HStack {
-                    Text(localizedString("upload_audio"))
-                    InfoButton(localizedString("hint_upload_audio"))
-                    Spacer()
-                    Toggle("", isOn: $enableAudioUpload)
-                }
-                .padding(.horizontal)
+                // HStack {
+                //     Text(localizedString("upload_audio"))
+                //     InfoButton(localizedString("hint_upload_audio"))
+                //     Spacer()
+                //     Toggle("", isOn: $enableAudioUpload)
+                // }
+                // .padding(.horizontal)
                 
-                if enableAudioUpload {
-                    TextField(localizedString("audio_upload_url"), text: $audioUploadURL)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                }
+                // if enableAudioUpload {
+                //     TextField(localizedString("audio_upload_url"), text: $audioUploadURL)
+                //         .textFieldStyle(RoundedBorderTextFieldStyle())
+                //         .padding(.horizontal)
+                // }
             }
         }
         .navigationTitle(localizedString("decoding_options"))
@@ -1568,7 +1568,7 @@ Text(String(format: NSLocalizedString("decoder_runs", comment: ""), currentDecod
         isTranscribing = false
         transcriptionTask?.cancel()
 
-        // 在停止实时转录后执行上传
+        // 在停��实时转录后��行上传
         Task {
             await MainActor.run {
                 print("检查是否需要上传文本")
